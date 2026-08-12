@@ -1,0 +1,56 @@
+@import "@fontsource/oswald/500.css";
+@import "@fontsource/oswald/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink text-cream font-body;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(231, 163, 62, 0.06), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(193, 80, 46, 0.05), transparent 45%);
+  }
+  ::selection {
+    background: #E7A33E;
+    color: #121116;
+  }
+  :focus-visible {
+    outline: 2px solid #E7A33E;
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em] text-amber;
+  }
+  .stencil-tag {
+    @apply font-mono text-[11px] uppercase tracking-[0.1em] text-smoke;
+  }
+  .hazard-corner {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      #E7A33E 0 6px,
+      #121116 6px 12px
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
