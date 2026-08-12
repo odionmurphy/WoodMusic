@@ -142,7 +142,7 @@ async function main() {
   console.log("Seeding categories…");
   const categoryIdBySlug = new Map<string, string>();
   for (const c of categoryData) {
-    const existing = await db.select().from(categories).where(eq(categories.slug, c.slug)).get();
+    const existing = await db.select().from(categories).where(eq(categories.slug, c.slug)).limit(1).then(r => r?.[0]);
     if (existing) {
       categoryIdBySlug.set(c.slug, existing.id);
     } else {
@@ -155,12 +155,12 @@ async function main() {
   console.log("Seeding products…");
   for (const p of productData) {
     const { category, specSheet, ...rest } = p;
-    const existing = await db.select().from(products).where(eq(products.slug, p.slug)).get();
+    const existing = await db.select().from(products).where(eq(products.slug, p.slug)).limit(1).then(r => r?.[0]);
     const row = {
       ...rest,
       specSheet: JSON.stringify(specSheet),
       categoryId: categoryIdBySlug.get(category)!,
-      createdAt: new Date(),
+      createdAt: Date.now(),
     };
     if (existing) {
       await db.update(products).set(row).where(eq(products.id, existing.id));

@@ -43,7 +43,7 @@ router.post("/", async (req: AuthedRequest, res) => {
     userId,
     totalCents,
     status: "paid", // mock checkout — no real payment gateway wired up
-    createdAt: new Date(),
+    createdAt: Date.now(),
   });
 
   for (const item of items) {
@@ -76,12 +76,12 @@ router.get("/", async (req: AuthedRequest, res) => {
       items: await db.select().from(orderItems).where(eq(orderItems.orderId, o.id)),
     }))
   );
-  res.json(withItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+  res.json(withItems.sort((a, b) => b.createdAt - a.createdAt));
 });
 
 // GET /api/orders/:id
 router.get("/:id", async (req: AuthedRequest, res) => {
-  const order = await db.select().from(orders).where(eq(orders.id, req.params.id)).get();
+  const order = await db.select().from(orders).where(eq(orders.id, req.params.id)).limit(1).then(r => r?.[0]);
   if (!order || order.userId !== req.userId) {
     return res.status(404).json({ error: "Order not found" });
   }

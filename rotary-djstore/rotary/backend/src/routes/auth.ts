@@ -22,14 +22,14 @@ router.post("/register", async (req, res) => {
   }
   const { email, password, name } = parsed.data;
 
-  const existing = await db.select().from(users).where(eq(users.email, email)).get();
+  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1).then(r => r?.[0]);
   if (existing) {
     return res.status(409).json({ error: "An account with that email already exists" });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
   const id = nanoid();
-  await db.insert(users).values({ id, email, passwordHash, name, createdAt: new Date() });
+  await db.insert(users).values({ id, email, passwordHash, name, createdAt: Date.now() });
 
   const token = signToken(id);
   res.status(201).json({ token, user: { id, email, name } });
@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
   }
   const { email, password } = parsed.data;
 
-  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  const user = await db.select().from(users).where(eq(users.email, email)).limit(1).then(r => r?.[0]);
   if (!user) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
@@ -61,7 +61,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", requireAuth, async (req: AuthedRequest, res) => {
-  const user = await db.select().from(users).where(eq(users.id, req.userId!)).get();
+  const user = await db.select().from(users).where(eq(users.id, req.userId!)).limit(1).then(r => r?.[0]);
   if (!user) return res.status(404).json({ error: "User not found" });
   res.json({ id: user.id, email: user.email, name: user.name });
 });

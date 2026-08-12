@@ -1,48 +1,40 @@
-// Rotary — database schema (Drizzle ORM, SQLite dialect)
-//
-// This runs on SQLite with zero config for local dev. To move to Postgres
-// (e.g. Neon, Render), swap the `sqlite-core` imports for `pg-core`
-// equivalents (text -> varchar/text, integer -> integer, etc.) and point
-// src/db/client.ts at a postgres-js or node-postgres connection instead —
-// the column definitions below map over almost 1:1.
+import { pgTable, text, integer, boolean, bigint } from "drizzle-orm/pg-core";
 
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const categories = sqliteTable("categories", {
+export const categories = pgTable("categories", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   blurb: text("blurb").notNull(),
 });
 
-export const products = sqliteTable("products", {
+export const products = pgTable("products", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   brand: text("brand").notNull(),
   unitNumber: text("unit_number").notNull(),
   description: text("description").notNull(),
-  specSheet: text("spec_sheet").notNull(), // JSON-encoded key/value spec list
+  specSheet: text("spec_sheet").notNull(),
   priceCents: integer("price_cents").notNull(),
   currency: text("currency").notNull().default("EUR"),
   stock: integer("stock").notNull().default(0),
   imageHue: integer("image_hue").notNull().default(30),
-  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
   categoryId: text("category_id")
     .notNull()
     .references(() => categories.id),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const cartItems = sqliteTable("cart_items", {
+export const cartItems = pgTable("cart_items", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -51,10 +43,10 @@ export const cartItems = sqliteTable("cart_items", {
     .notNull()
     .references(() => products.id),
   quantity: integer("quantity").notNull().default(1),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const orders = sqliteTable("orders", {
+export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -62,10 +54,10 @@ export const orders = sqliteTable("orders", {
   status: text("status").notNull().default("pending"),
   totalCents: integer("total_cents").notNull(),
   currency: text("currency").notNull().default("EUR"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
-export const orderItems = sqliteTable("order_items", {
+export const orderItems = pgTable("order_items", {
   id: text("id").primaryKey(),
   orderId: text("order_id")
     .notNull()

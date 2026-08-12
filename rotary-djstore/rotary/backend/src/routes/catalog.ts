@@ -79,7 +79,7 @@ router.get("/products/:slug", async (req, res) => {
     .from(products)
     .innerJoin(categories, eq(products.categoryId, categories.id))
     .where(eq(products.slug, req.params.slug))
-    .get();
+    .limit(1).then(r => r?.[0]);
 
   if (!row) return res.status(404).json({ error: "Product not found" });
   res.json(row);

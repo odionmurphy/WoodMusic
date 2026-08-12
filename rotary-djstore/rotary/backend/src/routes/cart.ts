@@ -44,14 +44,14 @@ router.post("/", async (req: AuthedRequest, res) => {
   if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
   const { productId, quantity } = parsed.data;
 
-  const product = await db.select().from(products).where(eq(products.id, productId)).get();
+  const product = await db.select().from(products).where(eq(products.id, productId)).limit(1).then(r => r?.[0]);
   if (!product) return res.status(404).json({ error: "Product not found" });
 
   const existing = await db
     .select()
     .from(cartItems)
     .where(and(eq(cartItems.userId, req.userId!), eq(cartItems.productId, productId)))
-    .get();
+    .limit(1).then(r => r?.[0]);
 
   if (existing) {
     await db
@@ -64,7 +64,7 @@ router.post("/", async (req: AuthedRequest, res) => {
       userId: req.userId!,
       productId,
       quantity,
-      createdAt: new Date(),
+      createdAt: Date.now(),
     });
   }
 
@@ -78,7 +78,7 @@ router.patch("/:itemId", async (req: AuthedRequest, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid quantity" });
 
-  const existing = await db.select().from(cartItems).where(eq(cartItems.id, req.params.itemId)).get();
+  const existing = await db.select().from(cartItems).where(eq(cartItems.id, req.params.itemId)).limit(1).then(r => r?.[0]);
   if (!existing || existing.userId !== req.userId) {
     return res.status(404).json({ error: "Cart item not found" });
   }
@@ -94,7 +94,7 @@ router.patch("/:itemId", async (req: AuthedRequest, res) => {
 
 // DELETE /api/cart/:itemId
 router.delete("/:itemId", async (req: AuthedRequest, res) => {
-  const existing = await db.select().from(cartItems).where(eq(cartItems.id, req.params.itemId)).get();
+  const existing = await db.select().from(cartItems).where(eq(cartItems.id, req.params.itemId)).limit(1).then(r => r?.[0]);
   if (!existing || existing.userId !== req.userId) {
     return res.status(404).json({ error: "Cart item not found" });
   }
