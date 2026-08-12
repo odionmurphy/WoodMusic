@@ -1,26 +1,23 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import path from "path";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 
-const dbPath = process.env.DATABASE_URL?.replace(/^file:/, "") || path.join(__dirname, "../../dev.db");
-const sqlite = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is not set");
+}
 
-export const db = drizzle(sqlite, { schema });
+const client = postgres(connectionString);
+export const db = drizzle(client, { schema });
 
-// Lightweight, dependency-free "migration": create tables if they don't
-// exist yet. Fine for a demo/dev project; swap for drizzle-kit migrations
-// (or your platform's native migration flow) before shipping to production.
-export function ensureSchema() {
-  sqlite.exec(`
+export async function ensureSchema() {
+  await client`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       name TEXT NOT NULL,
-      created_at INTEGER NOT NULL
+      created_at BIGINT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS categories (
@@ -44,7 +41,7 @@ export function ensureSchema() {
       image_hue INTEGER NOT NULL DEFAULT 30,
       featured INTEGER NOT NULL DEFAULT 0,
       category_id TEXT NOT NULL REFERENCES categories(id),
-      created_at INTEGER NOT NULL
+      created_at BIGINT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS cart_items (
@@ -52,7 +49,7 @@ export function ensureSchema() {
       user_id TEXT NOT NULL REFERENCES users(id),
       product_id TEXT NOT NULL REFERENCES products(id),
       quantity INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
+      created_at BIGINT NOT NULL,
       UNIQUE(user_id, product_id)
     );
 
@@ -62,7 +59,7 @@ export function ensureSchema() {
       status TEXT NOT NULL DEFAULT 'pending',
       total_cents INTEGER NOT NULL,
       currency TEXT NOT NULL DEFAULT 'EUR',
-      created_at INTEGER NOT NULL
+      created_at BIGINT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS order_items (
@@ -73,5 +70,5 @@ export function ensureSchema() {
       unit_cents INTEGER NOT NULL,
       name_snap TEXT NOT NULL
     );
-  `);
+  `;
 }
