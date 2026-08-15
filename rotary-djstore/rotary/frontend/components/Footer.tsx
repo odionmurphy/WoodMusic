@@ -4,7 +4,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-5 py-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="font-display text-lg tracking-wide text-cream">ROTARY</p>
+            <p className="font-display text-lg tracking-wide text-cream">WOODMUSIC</p>
             <p className="mt-2 max-w-xs text-sm text-smoke">
               Gear that holds up past load-in. Turntables, mixers, and vinyl for people who play for a living.
             </p>
@@ -31,7 +31,7 @@ export function Footer() {
           </div>
         </div>
         <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.14em] text-smoke/60">
-          Rotary — demo storefront. No real payments are processed.
+          WoodMusic —  storefront.real payments are processed.
         </p>
       </div>
     </footer>
